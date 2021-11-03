@@ -10,3 +10,17 @@ class Api::V1::SubscriptionsController < ApplicationController
       render json: {:error => 'Record not found'}, status: 404
     end
   end
+
+  def destroy
+    customer = Customer.find_by_id(params[:customer])
+    subscription = customer.subscriptions.find_by_id(params[:id])
+    subscription.destroy
+    render json: {}, status: 204
+  end
+
+  private
+  def subscription_params
+    params.require(:subscription).permit(:title, :price, :status, :frequency).merge(tea_id: @tea.id)
+  end
+
+end
