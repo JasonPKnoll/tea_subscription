@@ -42,3 +42,12 @@ describe 'Subscriptions Controller', type: :request do
       expect(customer[:data][:attributes][:frequency]).to eq('monthly')
 
     end
+
+    it 'renders 404 when no tea found' do
+      new_customer = create(:customer, id: 1)
+
+      post '/api/v1/subscriptions', params: params.to_json, headers: headers
+      expect(response.status).to eq(404)
+    end
+  end
+
