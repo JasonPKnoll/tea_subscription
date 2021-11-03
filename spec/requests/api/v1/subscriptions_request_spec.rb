@@ -51,3 +51,34 @@ describe 'Subscriptions Controller', type: :request do
     end
   end
 
+  describe 'DELETE /api/v1/subscription', :vrc do
+    let(:params) do
+      {
+        customer: "1",
+      }
+    end
+
+    let(:headers) do
+      {
+        'CONTENT_TYPE' => 'application/json',
+        'ACCEPT' => 'application/json',
+      }
+    end
+
+    it 'deletes the customers subscription' do
+      new_customer = create(:customer, id: 1)
+      new_tea = create(:tea, title: "green")
+      sub = new_customer.subscriptions.create(customer_id: new_customer.id,
+                                        tea_id: new_tea.id,
+                                        title: "something",
+                                        price: 10.00,
+                                        status: 0,
+                                        frequency: 0
+                                        )
+      expect(new_customer.subscriptions.count).to eq(1)
+      delete "/api/v1/subscriptions/#{sub.id}", params: params.to_json, headers: headers
+      expect(new_customer.subscriptions.count).to eq(0)
+      expect(response.status).to eq(204)
+    end
+  end
+end
