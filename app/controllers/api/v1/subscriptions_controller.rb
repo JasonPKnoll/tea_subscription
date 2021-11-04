@@ -11,10 +11,10 @@ class Api::V1::SubscriptionsController < ApplicationController
     end
   end
 
-  def destroy
-    customer = Customer.find_by_id(params[:customer])
+  def update
+    customer = Customer.find_by_id(params[:customer_id])
     subscription = customer.subscriptions.find_by_id(params[:id])
-    subscription.destroy
+    subscription.update(subscription_params)
     render json: {}, status: 204
   end
 
