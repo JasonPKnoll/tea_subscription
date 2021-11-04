@@ -1,10 +1,9 @@
 require 'rails_helper'
 
 describe 'Subscriptions Controller', type: :request do
-  describe 'POST /api/v1/subscription', :vrc do
+  describe "POST /api/v1/customers/:id/subscriptions", :vrc do
     let(:params) do
       {
-        customer: "1",
         tea: 'green',
         title: 'something',
         price: 10.00,
@@ -23,8 +22,9 @@ describe 'Subscriptions Controller', type: :request do
       new_customer = create(:customer)
       new_tea = create(:tea, title: "green")
 
-      post '/api/v1/subscriptions', params: params.to_json, headers: headers
+      post "/api/v1/customers/#{new_customer.id}/subscriptions", params: params.to_json, headers: headers
       customer = JSON.parse(response.body, symbolize_names: true)
+
       expect(customer[:data]).to have_key(:id)
       expect(customer[:data]).to have_key(:type)
       expect(customer[:data]).to have_key(:attributes)
@@ -46,15 +46,15 @@ describe 'Subscriptions Controller', type: :request do
     it 'renders 404 when no tea found' do
       new_customer = create(:customer, id: 1)
 
-      post '/api/v1/subscriptions', params: params.to_json, headers: headers
+      post "/api/v1/customers/#{new_customer.id}/subscriptions", params: params.to_json, headers: headers
       expect(response.status).to eq(404)
     end
   end
 
-  describe 'DELETE /api/v1/subscription', :vrc do
+  describe 'PATCH /api/v1/subscription', :vrc do
     let(:params) do
       {
-        customer: "1",
+        status: "archived"
       }
     end
 
@@ -65,7 +65,7 @@ describe 'Subscriptions Controller', type: :request do
       }
     end
 
-    it 'deletes the customers subscription' do
+    it 'patches the customers subscription' do
       new_customer = create(:customer, id: 1)
       new_tea = create(:tea, title: "green")
       sub = new_customer.subscriptions.create(customer_id: new_customer.id,
@@ -75,10 +75,11 @@ describe 'Subscriptions Controller', type: :request do
                                         status: 0,
                                         frequency: 0
                                         )
-      expect(new_customer.subscriptions.count).to eq(1)
-      delete "/api/v1/subscriptions/#{sub.id}", params: params.to_json, headers: headers
-      expect(new_customer.subscriptions.count).to eq(0)
+
+      expect(new_customer.subscriptions.first.status).to eq("active")
+      patch "/api/v1/customers/#{new_customer.id}/subscriptions/#{sub.id}", params: params.to_json, headers: headers
       expect(response.status).to eq(204)
+      expect(new_customer.subscriptions.first.status).to eq("archived")
     end
   end
 end
